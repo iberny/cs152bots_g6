@@ -55,11 +55,18 @@ class Report:
 
             # Here we've found the message - it's up to you to decide what to do next!
             self.state = State.MESSAGE_IDENTIFIED
-            return ["I found this message:", "```" + message.author.name + ": " + message.content + "```", \
-                    "This is all I know how to do right now - it's up to you to build out the rest of my reporting flow!"]
+            return ["I found this message:", "```" + message.author.name + ": " + message.content + "```", "Is this a 'user' or 'LLM' message?"]
         
         if self.state == State.MESSAGE_IDENTIFIED:
-            return ["<insert rest of reporting flow here>"]
+            if message.content == 'user':
+                return ["Please select a reason for reporting this message:", "Offensive Content", "Imminent Danger", "Criminal Activity"]
+            if message.content == 'LLM':
+                return ["Thank you for reporting, we've sent this to our moderator team!"]
+            if "kill my self" in message.content.lower() or "kms" in message.content.lower(): 
+                return  + ["This message contains harmful langauge and will be removed!"]
+            return []
+        
+
 
         return []
 
