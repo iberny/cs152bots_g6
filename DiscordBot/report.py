@@ -62,11 +62,50 @@ class Report:
                 return ["Please select a reason for reporting this message:", "Offensive Content", "Imminent Danger", "Criminal Activity"]
             if message.content == 'LLM':
                 return ["Thank you for reporting, we've sent this to our moderator team!"]
-            if "kill my self" in message.content.lower() or "kms" in message.content.lower(): 
-                return  + ["This message contains harmful langauge and will be removed!"]
-            return []
-        
+            # if "kill my self" in message.content.lower() or "kms" in message.content.lower(): 
+            #     return  + ["This message contains harmful langauge and will be removed!"]
+            if message.content == "Offensive Content":
+                return ["Please select the type of offensive content:", "Sexual Content", "Hate Speech or Discrimination", "Violent or Gory Language"]
+            if message.content == "Imminent Danger":
+                return ["Please select the type of imminent danger:", "Self Harm", "Suicide", "Risky Behavior"]
+            if message.content == "Criminal Activity":
+                return ["Please select the type of criminal activity:", "Violence toward others", "Designing Scams", "Theft", "Terrorism"]
+            if message.content == "Sexual Content":
+                return ["Please select the type of sexual content:", "Sexual relationship with chatbot", "Graphic sexual descriptions", "Sexual violence"]
+            if message.content == "Hate Speech or Discrimination":
+                return ["Please select the type of hate speech or discrimination:", "Racism", "Misogyny", "Homophobia", "Transphobia"]
+            if message.content == "Violent or Gory Language":
+                return ["Please select the type of violent or gory language:", "Animal harm", "Human body mutilation"]
+            if message.content ==  "Self Harm":
+                return ["Please select method of self harm discussed:", "Cutting", "Self-starvation", "Self-violence", "Other", "Unknown"]
+            if message.content == "Suicide":
+                return ["Please select method of suicide discussed:", "Firearm", "Drug overdose", "Motor vehicle accident", "Other", "Unknown"]
+            if message.content == "Risky behavior":
+                return ["Please select type of risky behavior discussed:", "Drug abuse", "Risky stunts", "Other", "Unknown"]
+            if message.content == "Violence toward others" or message.content == \
+            "Designing Scams" or message.content == "Theft" or message.content == "Terrorism" or \
+            message.content == "Sexual violence" or message.content == "Violence toward others" or \
+            message.content == "Cutting" or message.content == "Self-starvation" or message.content == "Self-violence" or \
+            message.content == "Other" or message.content == "Unknown" or \
+            message.content == "Firearm" or message.content == "Drug overdose" or \
+            message.content == "Motor vehicle accident" or message.content == "Drug abuse" or \
+            message.content == "Risky stunts" or message.content == "Animal harm" or \
+            message.content == "Human body mutilation":
+                return ["Does the user have specific plans or serious intentions of carrying out this act?", "Yes", "No", "Unsure"]
+            if message.content == "Yes":
+                self.state = State.REPORT_COMPLETE
+                return ["Thank you for letting us know. Please call 911 immediately to report the information you have, and we will also work to ensure the safety of the vulnerable parties."]
+            if message.content == "No" or message.content == "Unsure" or message.content == "Racism" or \
+            message.content == "Misogyny" or message.content == "Homophobia" or \
+            message.content == "Transphobia" or message.content == "Sexual relationship with chatbot" or \
+            message.content == "Graphic sexual descriptions":
+                self.state = State.REPORT_COMPLETE
+                return ["Thank you for letting us know. We take this concern seriously and will follow up with the user."]
+            if message.content == "report":
+                self.state = State.REPORT_START
+                return await self.handle_message(message)
 
+            return ["Please enter a valid response or type 'cancel' to end your report. Remember that responses are case-sensitive."]
 
         return []
 
