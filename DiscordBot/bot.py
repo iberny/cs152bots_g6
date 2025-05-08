@@ -53,7 +53,6 @@ class ModBot(discord.Client):
             for channel in guild.text_channels:
                 if channel.name == f'group-{self.group_num}-mod':
                     self.mod_channels[guild.id] = channel
-        
 
     async def on_message(self, message):
         '''
@@ -69,6 +68,31 @@ class ModBot(discord.Client):
             await self.handle_channel_message(message)
         else:
             await self.handle_dm(message)
+
+    async def on_raw_reaction_add(self, payload):
+        print("saw reaction")
+        if payload.user_id == self.user.id:
+            return
+        channel = self.get_channel(payload.channel_id)
+        if not channel:
+            return
+        if not channel.name == f'group-{self.group_num}-mod':
+            return
+        
+        if self.get_guild(payload.guild_id):
+            if str(payload.emoji.name) != '❌' and str(payload.emoji.name) != '👎':
+                return
+            message = await channel.fetch_message(payload.message_id)
+            for author in self.reports:
+                report = self.reports[author]
+                if report.message.content == message.content:
+                    print("foind message to delete")
+                    await report.message.delete()
+                    if str(payload.emoji.name) == '❌':
+                        await report.message.channel.send(f"{report.message.author[:-1]} has been removed from this channel")
+                    self.reports.pop(author)
+                    print("removed")
+                    break
 
     async def handle_dm(self, message):
         # Handle a help message
@@ -89,14 +113,26 @@ class ModBot(discord.Client):
         if author_id not in self.reports:
             self.reports[author_id] = Report(self)
 
-        # Let the report class handle this message; forward all the messages it returns to uss
+        # Let the report class handle this message; forward all the messages it returns to us
         responses = await self.reports[author_id].handle_message(message)
         for r in responses:
             await message.channel.send(r)
 
         # If the report is complete or cancelled, remove it from our map
-        if self.reports[author_id].report_complete():
-            self.reports.pop(author_id)
+        if not self.reports[author_id].report_complete():
+            return
+        
+        if not self.reports[author_id].awaiting_mod:
+            if self.reports[author_id].send_to_mod:
+                await self.send_reported_message(self.reports[author_id])
+
+    async def send_reported_message(self, report):
+        message = report.message
+        mod_channel = self.mod_channels[message.guild.id]
+        await mod_channel.send('If you would you like to remove this message, react with 👎')
+        await mod_channel.send('If you like to remove this message and ban the user, react with ❌:')
+        await mod_channel.send(message.content)
+        report.awaiting_mod = True
 
     async def handle_channel_message(self, message):
         # Only handle messages sent in the "group-#" channel

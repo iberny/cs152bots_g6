@@ -17,6 +17,8 @@ class Report:
         self.state = State.REPORT_START
         self.client = client
         self.message = None
+        self.send_to_mod = False
+        self.awaiting_mod = False
     
     async def handle_message(self, message):
         '''
@@ -55,9 +57,14 @@ class Report:
 
             # Here we've found the message - it's up to you to decide what to do next!
             self.state = State.MESSAGE_IDENTIFIED
+            self.message = message
             return ["I found this message:", "```" + message.author.name + ": " + message.content + "```", "Is this a 'user' or 'LLM' message?"]
         
         if self.state == State.MESSAGE_IDENTIFIED:
+            if message.content == 'bypass':
+                self.send_to_mod = True
+                self.state = State.REPORT_COMPLETE
+                return ["Message forwarded"]
             if message.content == 'user':
                 return ["Please select a reason for reporting this message:", "Offensive Content", "Imminent Danger", "Criminal Activity"]
             if message.content == 'LLM':
@@ -94,12 +101,14 @@ class Report:
                 return ["Does the user have specific plans or serious intentions of carrying out this act?", "Yes", "No", "Unsure"]
             if message.content == "Yes":
                 self.state = State.REPORT_COMPLETE
+                self.send_to_mod = True
                 return ["Thank you for letting us know. Please call 911 immediately to report the information you have, and we will also work to ensure the safety of the vulnerable parties."]
             if message.content == "No" or message.content == "Unsure" or message.content == "Racism" or \
             message.content == "Misogyny" or message.content == "Homophobia" or \
             message.content == "Transphobia" or message.content == "Sexual relationship with chatbot" or \
             message.content == "Graphic sexual descriptions":
                 self.state = State.REPORT_COMPLETE
+                self.send_to_mod = True
                 return ["Thank you for letting us know. We take this concern seriously and will follow up with the user."]
             if message.content == "report":
                 self.state = State.REPORT_START
