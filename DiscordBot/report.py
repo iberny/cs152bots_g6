@@ -19,6 +19,7 @@ class Report:
         self.message = None
         self.send_to_mod = False
         self.awaiting_mod = False
+        self.danger = False
     
     async def handle_message(self, message):
         '''
@@ -63,6 +64,7 @@ class Report:
         if self.state == State.MESSAGE_IDENTIFIED:
             if message.content == 'bypass':
                 self.send_to_mod = True
+                self.danger = True
                 self.state = State.REPORT_COMPLETE
                 return ["Message forwarded"]
             if message.content == 'user':
@@ -102,6 +104,7 @@ class Report:
             if message.content == "Yes":
                 self.state = State.REPORT_COMPLETE
                 self.send_to_mod = True
+                self.danger = True
                 return ["Thank you for letting us know. Please call 911 immediately to report the information you have, and we will also work to ensure the safety of the vulnerable parties."]
             if message.content == "No" or message.content == "Unsure" or message.content == "Racism" or \
             message.content == "Misogyny" or message.content == "Homophobia" or \

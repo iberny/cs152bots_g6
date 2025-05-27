@@ -86,12 +86,10 @@ class ModBot(discord.Client):
             for author in self.reports:
                 report = self.reports[author]
                 if report.message.content == message.content:
-                    print("foind message to delete")
                     await report.message.delete()
                     if str(payload.emoji.name) == '❌':
-                        await report.message.channel.send(f"{report.message.author[:-1]} has been removed from this channel")
+                        await report.message.channel.send(f"{report.message.author} has been removed from this channel")
                     self.reports.pop(author)
-                    print("removed")
                     break
 
     async def handle_dm(self, message):
@@ -129,6 +127,8 @@ class ModBot(discord.Client):
     async def send_reported_message(self, report):
         message = report.message
         mod_channel = self.mod_channels[message.guild.id]
+        if report.danger == True:
+            await mod_channel.send('This message was flagged as causing imminent danger to the user or other parties. Please follow the proper protocols and contact local authorities.')
         await mod_channel.send('If you would you like to remove this message, react with 👎')
         await mod_channel.send('If you like to remove this message and ban the user, react with ❌:')
         await mod_channel.send(message.content)
