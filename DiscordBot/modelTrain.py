@@ -23,7 +23,7 @@ def tokenize_function(example):
 
 tokenized_dataset = dataset.map(tokenize_function, batched=True)
 
-# ====== LOAD MODEL ======
+# Load and set up model
 num_labels = len(le.classes_)
 model = DistilBertForSequenceClassification.from_pretrained("distilbert-base-uncased", num_labels=num_labels)
 device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
