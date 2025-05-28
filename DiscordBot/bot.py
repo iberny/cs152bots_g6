@@ -7,7 +7,9 @@ import logging
 import re
 import requests
 from report import Report
+from modelPredict import Predictor
 import pdb
+
 
 # Set up logging to the console
 logger = logging.getLogger('discord')
@@ -34,6 +36,7 @@ class ModBot(discord.Client):
         self.group_num = None
         self.mod_channels = {} # Map from guild to the mod channel id for that guild
         self.reports = {} # Map from user IDs to the state of their report
+        self.predictor = Predictor()
 
     async def on_ready(self):
         print(f'{self.user.name} has connected to Discord! It is these guilds:')
@@ -70,7 +73,6 @@ class ModBot(discord.Client):
             await self.handle_dm(message)
 
     async def on_raw_reaction_add(self, payload):
-        print("saw reaction")
         if payload.user_id == self.user.id:
             return
         channel = self.get_channel(payload.channel_id)
@@ -85,7 +87,7 @@ class ModBot(discord.Client):
             message = await channel.fetch_message(payload.message_id)
             for author in self.reports:
                 report = self.reports[author]
-                if report.message.content == message.content:
+                if report.message.content in message.content:
                     await report.message.delete()
                     if str(payload.emoji.name) == '❌':
                         await report.message.channel.send(f"{report.message.author} has been removed from this channel")
@@ -141,9 +143,11 @@ class ModBot(discord.Client):
 
         # Forward the message to the mod channel
         mod_channel = self.mod_channels[message.guild.id]
-        await mod_channel.send(f'Forwarded message:\n{message.author.name}: "{message.content}"')
+        # await mod_channel.send(f'Forwarded message:\n{message.author.name}: "{message.content}"')
         scores = self.eval_text(message.content)
-        await mod_channel.send(self.code_format(scores))
+        result = self.code_format(scores, message)
+        for msg in result:
+            await mod_channel.send(msg)
 
     
     def eval_text(self, message):
@@ -151,16 +155,34 @@ class ModBot(discord.Client):
         TODO: Once you know how you want to evaluate messages in your channel, 
         insert your code here! This will primarily be used in Milestone 3. 
         '''
-        return message
+        return self.predictor.predict(message)
 
     
-    def code_format(self, text):
+    def code_format(self, text, msg):
         ''''
         TODO: Once you know how you want to show that a message has been 
         evaluated, insert your code here for formatting the string to be 
         shown in the mod channel. 
         '''
-        return "Evaluated: '" + text+ "'"
+        result = []
+        name = (msg.author.name)[:-1]
+        result.append(f"This message from '{name}' was evaluated to be " + text)
+        if text != "no risk":
+            author_id = msg.author.id
+
+            # If we don't currently have an active report for this user, add one
+            if author_id not in self.reports:
+                self.reports[author_id] = Report(self)
+                self.reports[author_id].message = msg
+
+            if text == 'high risk':
+                result.append('It was flagged as causing imminent danger to the user or other parties. Please follow the proper protocols and contact local authorities.')
+            result.append('If you would you like to remove this message, react with 👎')
+            result.append('If you like to remove this message and ban the user, react with ❌:')
+            result.append(f'React to this message: "{msg.content}"')
+        else:
+            result.append(f'Message: "{msg.content}"')
+        return result
 
 
 client = ModBot()

@@ -2,14 +2,16 @@ import os
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 from transformers import DistilBertTokenizer, DistilBertForSequenceClassification
+from sentence_transformers import SentenceTransformer
 import torch
 import joblib
 
 class Predictor:
     def __init__(self):
-        self.svm_model = joblib.load("Models/svm_model.pkl")
+        self.svm_model = joblib.load("Models/SVM/svm_model_bert.pkl")
         self.vectorizer = joblib.load("Models/tfidf_vectorizer.pkl")
-        self.le = joblib.load("Models/label_encoder.pkl")
+        self.le = joblib.load("Models/SVM/label_encoder.pkl")
+        self.bert_model = SentenceTransformer('all-MiniLM-L6-v2')
 
         self.BERTmodel = DistilBertForSequenceClassification.from_pretrained("DistilBERTModel")
         self.BERTtokenizer = DistilBertTokenizer.from_pretrained("DistilBERTModel")
@@ -20,10 +22,22 @@ class Predictor:
     def simplePredict(self, text):
         if not isinstance(text, list):
             text = [text]
-        X_new = vectorizer.transform(text)
-        y_pred = svm_model.predict(X_new)
-        predicted_labels = le.inverse_transform(y_pred)
+        X_new = self.vectorizer.transform(text)
+        y_pred = self.svm_model.predict(X_new)
+        predicted_labels = self.le.inverse_transform(y_pred)
         return(predicted_labels)
+
+    def svmPredict(self,text):
+        if not isinstance(text, list):
+            text = [text]
+        sentence_embeddings = self.bert_model.encode(text, convert_to_numpy=True)
+        predictions = self.svm_model.predict(sentence_embeddings)
+        predicted_labels = self.le.inverse_transform(predictions)
+        return predicted_labels
+
+        # Show results
+        # for sentence, label in zip(sentences, predicted_labels):
+        #     print(f"Sentence: {sentence}\nPredicted Label: {label}\n")
 
     def predict(self, text):
         inputs = self.BERTtokenizer(text, return_tensors="pt", padding=True, truncation=True)
@@ -50,7 +64,7 @@ def main():
         text = input("Enter a sentence or enter to quit: ")
         if text == "":
             break
-        result = predictor.predict(text)
+        result = predictor.svmPredict(text)
         print(result)
 
 if __name__ == "__main__":
