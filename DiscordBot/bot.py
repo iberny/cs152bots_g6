@@ -37,6 +37,7 @@ class ModBot(discord.Client):
         self.mod_channels = {} # Map from guild to the mod channel id for that guild
         self.reports = {} # Map from user IDs to the state of their report
         self.predictor = Predictor()
+        self.concerns = {}
 
     async def on_ready(self):
         print(f'{self.user.name} has connected to Discord! It is these guilds:')
@@ -166,8 +167,8 @@ class ModBot(discord.Client):
         '''
         result = []
         name = (msg.author.name)[:-1]
-        result.append(f"This message from '{name}' was evaluated to be " + text)
         if text != "no risk":
+            result.append(f"This message from '{name}' was evaluated to be " + text)
             author_id = msg.author.id
 
             # If we don't currently have an active report for this user, add one
@@ -177,11 +178,20 @@ class ModBot(discord.Client):
 
             if text == 'high risk':
                 result.append('It was flagged as causing imminent danger to the user or other parties. Please follow the proper protocols and contact local authorities.')
-            result.append('If you would you like to remove this message, react with 👎')
-            result.append('If you like to remove this message and ban the user, react with ❌:')
-            result.append(f'React to this message: "{msg.content}"')
-        else:
-            result.append(f'Message: "{msg.content}"')
+                result.append('If you would you like to remove this message, react with 👎')
+                result.append('If you like to remove this message and ban the user, react with ❌:')
+                result.append(f'React to this message: "{msg.content}"')
+            elif text == 'moderate risk':
+                if msg.author.name not in self.concerns:
+                    self.concerns[msg.author.name] = 0
+                self.concerns[msg.author.name] += 1
+                if self.concerns[msg.author.name] == 3:
+                    result.append(f"{name} has sent multiple messages consistent with moderate risk")
+                    result.append('If you would you like to remove this message, react with 👎')
+                    result.append('If you like to remove this message and ban the user, react with ❌:')
+                    result.append(f'React to this message: "{msg.content}"')
+                else:
+                    result.append(f'Message: "{msg.content}"')
         return result
 
 
