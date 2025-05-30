@@ -13,11 +13,11 @@ class Predictor:
         self.le = joblib.load("Models/SVM/label_encoder.pkl")
         self.bert_model = SentenceTransformer('all-MiniLM-L6-v2')
 
-        self.BERTmodel = DistilBertForSequenceClassification.from_pretrained("DistilBERTModel")
-        self.BERTtokenizer = DistilBertTokenizer.from_pretrained("DistilBERTModel")
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.BERTmodel.to(self.device)
-        self.BERTmodel.eval()
+        # self.BERTmodel = DistilBertForSequenceClassification.from_pretrained("DistilBERTModel")
+        # self.BERTtokenizer = DistilBertTokenizer.from_pretrained("DistilBERTModel")
+        # self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # self.BERTmodel.to(self.device)
+        # self.BERTmodel.eval()
 
     def simplePredict(self, text):
         if not isinstance(text, list):

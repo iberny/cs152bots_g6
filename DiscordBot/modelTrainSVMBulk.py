@@ -9,7 +9,7 @@ from sentence_transformers import SentenceTransformer
 from numpy import unique
 
 # Load your dataset
-df = pd.read_csv("/Users/ricky/Desktop/Updated.csv", usecols=['sentence', 'label'])  # Replace with your actual file path
+df = pd.read_csv("/Users/ricky/Desktop/FinalData.csv", usecols=['sentence', 'label'])  # Replace with your actual file path
 
 # Encode labels
 le = LabelEncoder()
@@ -42,25 +42,26 @@ X_test_embeddings = bert_model.encode(X_test.tolist(), convert_to_numpy=True)
 
 
 # Train SVM on BERT embeddings
-svm_model = SVC(C=0.005, kernel='linear', probability=True, verbose=True)
-param_grid = {
-    'C': [0.001, 0.005, 0.01, 0.1, 1.0, 10]
-}
-grid_search = GridSearchCV(svm_model, param_grid, cv=5, scoring='f1_macro', verbose=2, n_jobs=-1)
+svm_model = SVC(C=.1, kernel='linear', probability=True, verbose=True)
 
-grid_search.fit(X_train_embeddings, y_train)
+svm_model.fit(X_train_embeddings, y_train)
 
 # joblib.dump(svm_model, "svm_model_bert.pkl")
 # joblib.dump(le, "label_encoder.pkl")
 
-print("Best parameters found:", grid_search.best_params_)
-print("Best CV score:", grid_search.best_score_)
+# print("Best parameters found:", svm_model.best_params_)
+# print("Best CV score:", svm_model.best_score_)
 
 # Save best model
-joblib.dump(grid_search.best_estimator_, "svm_model_bert_best.pkl")
+
+joblib.dump(svm_model, "svm_model.pkl")
+
+# joblib.dump(vectorizer, "tfidf_vectorizer.pkl")
+
+joblib.dump(le, "label_encoder.pkl")
 
 # Predict using best model
-y_pred = grid_search.best_estimator_.predict(X_test_embeddings)
+y_pred = svm_model.predict(X_test_embeddings)
 
 # Evaluation
 print("Classification Report:\n")
