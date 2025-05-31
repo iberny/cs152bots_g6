@@ -1,4 +1,5 @@
 import pandas as pd
+import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
 from sklearn.preprocessing import LabelEncoder
@@ -7,9 +8,11 @@ import joblib
 from sklearn.model_selection import GridSearchCV
 from sentence_transformers import SentenceTransformer
 from numpy import unique
+from sklearn import metrics
 
 # Load your dataset
-df = pd.read_csv("/Users/ricky/Desktop/FinalData.csv", usecols=['sentence', 'label'])  # Replace with your actual file path
+# df = pd.read_csv("/Users/ricky/Desktop/FinalData.csv", usecols=['sentence', 'label'])  # Replace with your actual file path
+df = pd.read_csv("/Users/isabelb/Downloads/CS152/updated.csv", usecols=['sentence', 'label'])
 
 # Encode labels
 le = LabelEncoder()
@@ -68,4 +71,8 @@ print("Classification Report:\n")
 print(classification_report(y_test, y_pred, target_names=le.classes_))
 
 print("Confusion Matrix:\n")
-print(confusion_matrix(y_test, y_pred))
+confusion_matrix = metrics.confusion_matrix(y_test, y_pred)
+cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix = confusion_matrix, display_labels = le.classes_)
+cm_display.plot()
+plt.show()
+# print(confusion_matrix(y_test, y_pred))
