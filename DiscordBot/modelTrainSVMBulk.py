@@ -11,8 +11,8 @@ from numpy import unique
 from sklearn import metrics
 
 # Load your dataset
-# df = pd.read_csv("/Users/ricky/Desktop/FinalData.csv", usecols=['sentence', 'label'])  # Replace with your actual file path
-df = pd.read_csv("/Users/isabelb/Downloads/CS152/updated.csv", usecols=['sentence', 'label'])
+df = pd.read_csv("/Users/ricky/Desktop/FinalData.csv", usecols=['sentence', 'label'])  # Replace with your actual file path
+# df = pd.read_csv("/Users/isabelb/Downloads/CS152/updated.csv", usecols=['sentence', 'label'])
 
 # Encode labels
 le = LabelEncoder()
@@ -45,9 +45,12 @@ X_test_embeddings = bert_model.encode(X_test.tolist(), convert_to_numpy=True)
 
 
 # Train SVM on BERT embeddings
-svm_model = SVC(C=.1, kernel='linear', probability=True, verbose=True)
-
-svm_model.fit(X_train_embeddings, y_train)
+# svm_model = SVC(C=.1, kernel='linear', probability=True, verbose=True)
+svm_model = joblib.load("Models/SVM/svm_model_bert.pkl")
+vectorizer = joblib.load("Models/tfidf_vectorizer.pkl")
+le = joblib.load("Models/SVM/label_encoder.pkl")
+bert_model = SentenceTransformer('all-MiniLM-L6-v2')
+# svm_model.fit(X_train_embeddings, y_train)
 
 # joblib.dump(svm_model, "svm_model_bert.pkl")
 # joblib.dump(le, "label_encoder.pkl")

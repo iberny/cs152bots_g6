@@ -145,8 +145,8 @@ class ModBot(discord.Client):
         # Forward the message to the mod channel
         mod_channel = self.mod_channels[message.guild.id]
         # await mod_channel.send(f'Forwarded message:\n{message.author.name}: "{message.content}"')
-        scores = self.eval_text(message.content)
-        result = self.code_format(scores, message)
+        classification = self.eval_text(message.content)[0]
+        result = await self.code_format(classification, message)
         for msg in result:
             await mod_channel.send(msg)
 
@@ -159,7 +159,7 @@ class ModBot(discord.Client):
         return self.predictor.svmPredict(message)
 
     
-    def code_format(self, text, msg):
+    async def code_format(self, classification, msg):
         ''''
         TODO: Once you know how you want to show that a message has been 
         evaluated, insert your code here for formatting the string to be 
@@ -167,31 +167,45 @@ class ModBot(discord.Client):
         '''
         result = []
         name = (msg.author.name)[:-1]
-        if text != "no risk":
-            result.append(f"This message from '{name}' was evaluated to be " + text)
-            author_id = msg.author.id
+        if classification == "no risk":
+            result.append("-------------------------------------")
+            return []
+        result.append(f"This message from '{name}' was evaluated to be " + classification + ".")
+        author_id = msg.author.id
 
-            # If we don't currently have an active report for this user, add one
-            if author_id not in self.reports:
-                self.reports[author_id] = Report(self)
-                self.reports[author_id].message = msg
+        # If we don't currently have an active report for this user, add one
+        if author_id not in self.reports:
+            self.reports[author_id] = Report(self)
+            self.reports[author_id].message = msg
 
-            if text == 'high risk':
-                result.append('It was flagged as causing imminent danger to the user or other parties. Please follow the proper protocols and contact local authorities.')
-                result.append('If you would you like to remove this message, react with 👎')
-                result.append('If you like to remove this message and ban the user, react with ❌:')
-                result.append(f'React to this message: "{msg.content}"')
-            elif text == 'moderate risk':
-                if msg.author.name not in self.concerns:
-                    self.concerns[msg.author.name] = 0
-                self.concerns[msg.author.name] += 1
-                if self.concerns[msg.author.name] == 3:
-                    result.append(f"{name} has sent multiple messages consistent with moderate risk")
-                    result.append('If you would you like to remove this message, react with 👎')
-                    result.append('If you like to remove this message and ban the user, react with ❌:')
-                    result.append(f'React to this message: "{msg.content}"')
-                else:
-                    result.append(f'Message: "{msg.content}"')
+        if classification == 'high risk':
+            result.append(f'Message: "{msg.content}"')
+            result.append('It was flagged as causing imminent danger to the user or other parties. Please follow the proper protocols and contact local authorities.')
+            result.append('The message was removed and the user placed on a temporary ban.')
+            await msg.delete()
+            await msg.channel.send(f"{name} has been placed on a temporary ban")
+            safe_msg = ["I'm really sorry you're feeling this way.", "You're not alone, and there are people who care about you and want to help.", "If you're in immediate danger or need support, please reach out to a mental health professional or contact a crisis line in your area.", "For example, if you're in the U.S., you can call or text the 988 Suicide & Crisis Lifeline at 988 — it's free, confidential, and available 24/7."]
+            for sentence in safe_msg:
+                await msg.channel.send(sentence)
+            self.reports.pop(author_id)
+        elif classification == 'moderate risk':
+            if msg.author.name not in self.concerns:
+                self.concerns[msg.author.name] = {}
+                self.concerns[msg.author.name]["counter"] = 0
+                self.concerns[msg.author.name]["messages"] = []
+            self.concerns[msg.author.name]["counter"] += 1
+            self.concerns[msg.author.name]["messages"].append(msg.content)
+            result.append('If you would you like to remove this message, react with 👎')
+            result.append('If you like to remove this message and place this user on a temporary ban, react with ❌:')
+            result.append(f'React to this message: "{msg.content}"')
+            if self.concerns[msg.author.name]["counter"] >= 3:
+                result.append("-------------------------------------")
+                result.append(f"{name} has sent multiple messages consistent with moderate risk. Please review the following messages and escalate the concern if needed")
+                for i in range(len(self.concerns[msg.author.name]["messages"])):
+                    result.append(f'{i}. ' + '"' + self.concerns[msg.author.name]["messages"][i] + '"')
+                # result.append('If you like to remove this message and place this user on a temporary ban, react with ❌:')
+                # result.append(f'React to this message to place a ban on the user.')
+        result.append("-------------------------------------")
         return result
 
 
