@@ -5,6 +5,7 @@ import re
 class State(Enum):
     REPORT_START = auto()
     AWAITING_MESSAGE = auto()
+    AWAITING_OTHER_INPUT = auto()
     MESSAGE_IDENTIFIED = auto()
     REPORT_COMPLETE = auto()
 
@@ -71,8 +72,6 @@ class Report:
                 return ["Please select a reason for reporting this message:", "Offensive Content", "Imminent Danger", "Criminal Activity"]
             if message.content == 'LLM':
                 return ["Thank you for reporting, we've sent this to our moderator team!"]
-            # if "kill my self" in message.content.lower() or "kms" in message.content.lower(): 
-            #     return  + ["This message contains harmful langauge and will be removed!"]
             if message.content == "Offensive Content":
                 return ["Please select the type of offensive content:", "Sexual Content", "Hate Speech or Discrimination", "Violent or Gory Language"]
             if message.content == "Imminent Danger":
@@ -91,6 +90,12 @@ class Report:
                 return ["Please select method of suicide discussed:", "Firearm", "Drug overdose", "Motor vehicle accident", "Other", "Unknown"]
             if message.content == "Risky behavior":
                 return ["Please select type of risky behavior discussed:", "Drug abuse", "Risky stunts", "Other", "Unknown"]
+            
+            if message.content == "Other":
+                self.state = State.AWAITING_OTHER_INPUT
+                return ["Please type what you mean by 'Other':"]
+
+            
             if message.content == "Violence toward others" or message.content == \
             "Designing Scams" or message.content == "Theft" or message.content == "Terrorism" or \
             message.content == "Sexual violence" or message.content == "Violence toward others" or \
@@ -113,6 +118,13 @@ class Report:
                 self.state = State.REPORT_COMPLETE
                 self.send_to_mod = True
                 return ["Thank you for letting us know. We take this concern seriously and will follow up with the user."]
+            
+            if self.state == State.AWAITING_OTHER_INPUT:
+                self.state = State.REPORT_COMPLETE
+                self.send_to_mod = True
+                return ["Thank you for specifying. We will send this to our moderator team."]
+
+            
             if message.content == "report":
                 self.state = State.REPORT_START
                 return await self.handle_message(message)
