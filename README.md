@@ -1,4 +1,26 @@
 # CS 152 - Trust and Safety Engineering
+
+## Final Submission
+
+All relevant files for our final submission can be found in the DiscordBot folder.
+
+Alongside report.py and bot.py, which are used for our reporting flows on Discord,
+modelTrainSVMBulk.py and the models in the Models folder were used to train our 
+classification model for reporting, and modelPredict.py is used to classify messages 
+on Discord for our automated reporting flows.
+
+The data used to train our models can be found within the FinalSubmissionExtraFiles 
+folder, with generate_dataset.py being the script used to generate synthetic examples
+following the QPR suicide prevention framework, and FinalData.csv being our final
+dataset used to train and test the model.
+
+Also within the FinalSubmissionExtraFiles folder are our final poster, the moderator
+review flow, the user reporting flow, the confusion matrix and precision/recall/
+accuracy data used to evaluate the model, and our final demo video showing how the
+bot works on Discord.
+
+Our final demo video can also be found [here](https://drive.google.com/file/d/18SeZaneBkLY_1ANi8-bz77GaIcOc1pB6/view?usp=sharing).
+
 ## Discord Bot Framework Code
 
 This is the base framework for students to complete Milestone 2 of the CS 152 final project. Please follow the instructions to fork this repository into your repository and make all of your additions there. 
