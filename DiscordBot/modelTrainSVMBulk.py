@@ -12,7 +12,7 @@ from sklearn import metrics
 
 # Load your dataset
 # df = pd.read_csv("/Users/ricky/Desktop/FinalData.csv", usecols=['sentence', 'label'])  # Replace with your actual file path
-df = pd.read_csv("/Users/isabelb/Downloads/CS152/updated.csv", usecols=['sentence', 'label'])
+df = pd.read_csv("/Users/isabelb/Downloads/CS152/FinalData.csv", usecols=['sentence', 'label'])
 
 # Encode labels
 le = LabelEncoder()
