@@ -19,7 +19,7 @@ review flow, the user reporting flow, the confusion matrix and precision/recall/
 accuracy data used to evaluate the model, and our final demo video showing how the
 bot works on Discord.
 
-Our final demo video can also be found [here](https://drive.google.com/file/d/18SeZaneBkLY_1ANi8-bz77GaIcOc1pB6/view?usp=sharing).
+Our final demo video, poster, and figures can also be found [here](https://drive.google.com/drive/folders/1NDtQitDuND1iD5SSEBZy3zLCZ57Aejpp?usp=sharing).
 
 ## Discord Bot Framework Code
 
