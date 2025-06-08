@@ -1,3 +1,5 @@
+# used chatGPT for overall structure 
+
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -6,8 +8,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import classification_report, confusion_matrix
 import joblib
 
-# Load your dataset
-df = pd.read_csv("/Users/ricky/Desktop/SD.csv", usecols=['sentence', 'label'])  # Replace with your filename
+df = pd.read_csv("/Users/ricky/Desktop/SD.csv", usecols=['sentence', 'label'])
 
 # Encode labels
 le = LabelEncoder()

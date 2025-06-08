@@ -1,3 +1,5 @@
+# useChatGPT for overall structure and debugging env errors and different sized array errors
+
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
@@ -10,8 +12,7 @@ from sentence_transformers import SentenceTransformer
 from numpy import unique
 from sklearn import metrics
 
-# Load your dataset
-# df = pd.read_csv("/Users/ricky/Desktop/FinalData.csv", usecols=['sentence', 'label'])  # Replace with your actual file path
+# df = pd.read_csv("/Users/ricky/Desktop/FinalData.csv", usecols=['sentence', 'label'])
 df = pd.read_csv("/Users/isabelb/Downloads/CS152/FinalData.csv", usecols=['sentence', 'label'])
 
 # Encode labels
