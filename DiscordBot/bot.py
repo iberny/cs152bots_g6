@@ -152,19 +152,10 @@ class ModBot(discord.Client):
 
     
     def eval_text(self, message):
-        ''''
-        TODO: Once you know how you want to evaluate messages in your channel, 
-        insert your code here! This will primarily be used in Milestone 3. 
-        '''
         return self.predictor.svmPredict(message)
 
     
     async def code_format(self, classification, msg):
-        ''''
-        TODO: Once you know how you want to show that a message has been 
-        evaluated, insert your code here for formatting the string to be 
-        shown in the mod channel. 
-        '''
         result = []
         name = (msg.author.name)[:-1]
         if classification == "no risk":

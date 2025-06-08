@@ -11,8 +11,7 @@ from numpy import unique
 from sklearn import metrics
 
 # Load your dataset
-# df = pd.read_csv("/Users/ricky/Desktop/FinalData.csv", usecols=['sentence', 'label'])  # Replace with your actual file path
-df = pd.read_csv("/Users/isabelb/Downloads/CS152/FinalData.csv", usecols=['sentence', 'label'])
+df = pd.read_csv("FinalSubmissionExtraFiles/FinalData.csv", usecols=['sentence', 'label'])  # must be in DiscordBot directory
 
 # Encode labels
 le = LabelEncoder()
@@ -78,4 +77,3 @@ confusion_matrix = metrics.confusion_matrix(y_test, y_pred)
 cm_display = metrics.ConfusionMatrixDisplay(confusion_matrix = confusion_matrix, display_labels = le.classes_)
 cm_display.plot()
 plt.show()
-# print(confusion_matrix(y_test, y_pred))
